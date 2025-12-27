@@ -1,5 +1,5 @@
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, memo } from 'react';
 import { Plus, Trash2, Activity, Zap, Atom, Calculator, CalendarClock, ArrowRight, CheckCircle2, Pencil, X, Brain, ChevronRight, History } from 'lucide-react';
 import { Session, Target, MistakeCounts } from '../types';
 import { Card } from './Card';
@@ -15,7 +15,7 @@ interface DashboardProps {
   onSaveSession: (session: Omit<Session, 'id' | 'timestamp'>) => void;
 }
 
-const ActivityHeatmap = ({ sessions }: { sessions: Session[] }) => {
+const ActivityHeatmap = memo(({ sessions }: { sessions: Session[] }) => {
   const days = useMemo(() => {
     const d = [];
     for (let i = 6; i >= 0; i--) {
@@ -44,9 +44,9 @@ const ActivityHeatmap = ({ sessions }: { sessions: Session[] }) => {
       ))}
     </div>
   );
-};
+});
 
-const SubjectPod = ({ 
+const SubjectPod = memo(({ 
   subject, 
   icon: Icon, 
   count, 
@@ -141,9 +141,9 @@ const SubjectPod = ({
       </div>
     </div>
   );
-};
+});
 
-const SubjectDetailModal = ({ 
+const SubjectDetailModal = memo(({ 
   subject, 
   sessions, 
   onClose,
@@ -206,8 +206,8 @@ const SubjectDetailModal = ({
              {subject === 'Chemistry' && <Zap className="text-orange-400" size={28} />}
              {subject === 'Maths' && <Calculator className="text-rose-400" size={28} />}
              <div>
-               <h2 className="text-2xl font-bold text-white uppercase tracking-wider">{subject} Command</h2>
-               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Module Control</p>
+               <h2 className="text-2xl font-bold text-white uppercase tracking-wider">{subject} Hub</h2>
+               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Chapter Progress</p>
              </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white">
@@ -221,13 +221,13 @@ const SubjectDetailModal = ({
             onClick={() => setActiveTab('log')}
             className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'log' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
           >
-            Log Session
+            Add Session
           </button>
           <button 
              onClick={() => setActiveTab('history')}
              className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
           >
-            History & Errors
+            Past Sessions
           </button>
         </div>
 
@@ -278,7 +278,7 @@ const SubjectDetailModal = ({
                     }}
                     className="w-full bg-indigo-600 py-4 rounded-2xl text-white font-bold uppercase tracking-widest hover:bg-indigo-500 disabled:opacity-50 shadow-lg shadow-indigo-600/20 transition-all mt-6"
                   >
-                    {incorrectCount > 0 ? 'Next: Analyze Mistakes' : 'Save Session'}
+                    {incorrectCount > 0 ? 'Next: Review Mistakes' : 'Save Session'}
                   </button>
                 </>
               ) : (
@@ -286,7 +286,7 @@ const SubjectDetailModal = ({
                   <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex justify-between items-center mb-4">
                      <div>
                        <span className="text-xs font-bold text-rose-300 uppercase block">Incorrect Answers</span>
-                       <span className="text-[10px] text-rose-500/60 font-bold uppercase">{allocatedMistakes} / {incorrectCount} Categorized</span>
+                       <span className="text-[10px] text-rose-500/60 font-bold uppercase">{allocatedMistakes} / {incorrectCount} Tagged</span>
                      </div>
                      <span className="text-2xl font-mono text-rose-400">{incorrectCount - allocatedMistakes} Left</span>
                   </div>
@@ -314,7 +314,7 @@ const SubjectDetailModal = ({
                       disabled={allocatedMistakes !== incorrectCount}
                       className="flex-[2] py-3 rounded-xl bg-emerald-600 text-white font-bold uppercase text-xs tracking-wider hover:bg-emerald-500 disabled:opacity-50 shadow-lg shadow-emerald-600/20"
                     >
-                      Confirm Log
+                      Save Progress
                     </button>
                   </div>
                 </>
@@ -325,13 +325,13 @@ const SubjectDetailModal = ({
               {/* History Stats */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-900 border border-white/5 p-4 rounded-2xl">
-                   <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Total Qs</p>
+                   <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Questions Done</p>
                    <p className="text-2xl font-mono font-bold text-white mt-1">
                      {sessions.reduce((a,b) => a + b.attempted, 0)}
                    </p>
                 </div>
                 <div className="bg-slate-900 border border-white/5 p-4 rounded-2xl">
-                   <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Accuracy</p>
+                   <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Success Rate</p>
                    <p className="text-2xl font-mono font-bold text-white mt-1">
                      {sessions.length > 0 ? Math.round((sessions.reduce((a,b) => a + b.correct, 0) / sessions.reduce((a,b) => a + b.attempted, 0)) * 100) : 0}%
                    </p>
@@ -340,7 +340,7 @@ const SubjectDetailModal = ({
 
               {/* Mistake Breakdown */}
               <div className="space-y-3">
-                 <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><Brain size={14} /> Cumulative Errors</h4>
+                 <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2"><Brain size={14} /> Mistake Patterns</h4>
                  {Object.keys(mistakesSummary).length === 0 ? (
                    <p className="text-xs text-slate-600 italic">No mistakes recorded yet.</p>
                  ) : (
@@ -364,7 +364,7 @@ const SubjectDetailModal = ({
 
               {/* Session List */}
               <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mt-2"><History size={14} /> Recent Logs</h4>
+                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 flex items-center gap-2 mt-2"><History size={14} /> Recent Sessions</h4>
                 {sessions.length === 0 ? (
                   <div className="text-center py-8 opacity-30 border border-dashed border-white/10 rounded-xl">
                     <p className="text-[10px] uppercase font-bold tracking-widest">No history</p>
@@ -392,7 +392,7 @@ const SubjectDetailModal = ({
       </div>
     </div>
   );
-};
+});
 
 export const Dashboard: React.FC<DashboardProps> = ({ 
   sessions, 
@@ -424,18 +424,18 @@ export const Dashboard: React.FC<DashboardProps> = ({
       <div className="space-y-8 animate-in fade-in duration-500">
         
         {/* Top Section */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight flex items-center gap-3">
-              Mission Control
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6">
+          <div className="flex flex-col items-center md:items-start gap-2 order-2 md:order-1 w-full md:w-auto">
+             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest w-full text-center md:text-left">Weekly Streak</span>
+             <ActivityHeatmap sessions={sessions} />
+          </div>
+          <div className="text-center md:text-right order-1 md:order-2 w-full md:w-auto">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight flex items-center justify-center md:justify-end gap-3">
+              Ready to Study?
             </h2>
             <p className="text-xs text-indigo-300 uppercase tracking-widest font-bold opacity-70">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-             <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">7-Day Activity</span>
-             <ActivityHeatmap sessions={sessions} />
           </div>
         </div>
 
@@ -490,10 +490,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
              <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <CalendarClock size={16} className="text-indigo-400" /> Next Objectives
+                    <CalendarClock size={16} className="text-indigo-400" /> Up Next
                   </h3>
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                    {pendingTargets.length} Pending
+                    {pendingTargets.length} Tasks
                   </span>
                 </div>
                 
@@ -519,7 +519,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           {/* Right Column: Recent Activity Feed */}
           <div className="lg:col-span-1">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-               <Activity size={14} /> Today's Logs
+               <Activity size={14} /> Recent Activity
             </h3>
             
             <div className="space-y-3 max-h-[400px] overflow-y-auto no-scrollbar mask-gradient-bottom">

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Activity, 
   Calendar as CalendarIcon, 
@@ -17,7 +17,7 @@ import { Planner } from './components/Planner';
 import { TestLog } from './components/TestLog';
 import { Analytics } from './components/Analytics';
 
-const TracklyLogo = () => (
+const TracklyLogo = React.memo(() => (
   <div className="flex flex-col items-center gap-1 group">
     {/* SVG Waveform Icon */}
     <div className="relative w-12 h-8">
@@ -44,9 +44,9 @@ const TracklyLogo = () => (
       Trackly
     </span>
   </div>
-);
+));
 
-const AnimatedBackground = () => {
+const AnimatedBackground = React.memo(() => {
   const formulas = [
     "E = mc²", "∇ · B = 0", "iℏ∂ψ/∂t = Ĥψ", "F = G(m₁m₂)/r²",
     "PV = nRT", "∫ eˣ dx = eˣ", "x = (-b±√Δ)/2a", "F = ma",
@@ -54,16 +54,16 @@ const AnimatedBackground = () => {
     "eⁱπ + 1 = 0", "L = Iω", "E = hν", "∮ B·dl = μ₀I"
   ];
 
-  const seedItems = (count: number) => Array.from({ length: count }).map((_, i) => ({
+  // Memoize random values so they don't re-generate on re-renders,
+  // effectively making the background static once mounted.
+  const items = useMemo(() => Array.from({ length: formulas.length }).map((_, i) => ({
     id: i,
     top: `${(i * 17) % 95}%`,
     left: `${(i * 23) % 95}%`,
     duration: 40 + (i % 20),
     delay: -(i * 7),
     size: 0.7 + (i % 4) * 0.25
-  }));
-
-  const items = seedItems(formulas.length);
+  })), []);
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden select-none bg-[#020205]">
@@ -72,54 +72,53 @@ const AnimatedBackground = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-950/15 via-transparent to-transparent" />
       
       {/* Layer 2: Distant Star Field (Slow Parallax) */}
-      <div className="absolute inset-0 opacity-30 animate-star-drift-slow" 
+      <div className="absolute inset-0 opacity-30 animate-star-drift-slow gpu-accelerated" 
            style={{ 
              backgroundImage: `radial-gradient(1px 1px at 10px 10px, white, transparent), radial-gradient(1px 1px at 40px 60px, white, transparent), radial-gradient(1px 1px at 80px 30px, white, transparent)`, 
              backgroundSize: '150px 150px' 
            }} />
 
       {/* Layer 3: Medium Star Field (Medium Parallax) */}
-      <div className="absolute inset-0 opacity-40 animate-star-drift-medium" 
+      <div className="absolute inset-0 opacity-40 animate-star-drift-medium gpu-accelerated" 
            style={{ 
              backgroundImage: `radial-gradient(1.5px 1.5px at 15px 15px, white, transparent), radial-gradient(1.5px 1.5px at 100px 50px, white, transparent)`, 
              backgroundSize: '200px 200px' 
            }} />
 
       {/* Layer 4: Close Stars (Fast Parallax + Twinkle) */}
-      <div className="absolute inset-0 opacity-50 animate-star-drift-fast" 
+      <div className="absolute inset-0 opacity-50 animate-star-drift-fast gpu-accelerated" 
            style={{ 
              backgroundImage: `radial-gradient(2px 2px at 50px 50px, white, transparent), radial-gradient(2px 2px at 150px 120px, white, transparent)`, 
              backgroundSize: '300px 300px' 
            }} />
       
       {/* Layer 5: Galactic Nebulae (Dynamic Glows) */}
-      <div className="absolute top-[-20%] right-[-10%] w-[100%] h-[100%] opacity-25 blur-[120px] animate-nebula-pulse bg-indigo-600/20 rounded-full mix-blend-screen" />
-      <div className="absolute bottom-[-15%] left-[-20%] w-[100%] h-[100%] opacity-15 blur-[150px] animate-nebula-pulse-alt bg-purple-600/20 rounded-full mix-blend-screen" />
+      <div className="absolute top-[-20%] right-[-10%] w-[100%] h-[100%] opacity-25 blur-[120px] animate-nebula-pulse bg-indigo-600/20 rounded-full mix-blend-screen gpu-accelerated" />
+      <div className="absolute bottom-[-15%] left-[-20%] w-[100%] h-[100%] opacity-15 blur-[150px] animate-nebula-pulse-alt bg-purple-600/20 rounded-full mix-blend-screen gpu-accelerated" />
       
-      {/* Layer 6: Shooting Stars (Students as Kinetic Energy) */}
+      {/* Layer 6: Shooting Stars */}
       <div className="absolute inset-0">
          {[...Array(6)].map((_, i) => (
            <div 
              key={`shooting-star-${i}`}
              className="absolute h-[1px] w-[180px] bg-gradient-to-r from-transparent to-white opacity-0 animate-shooting-star"
              style={{
-               top: `${Math.random() * 40}%`, // Start in upper half
-               left: `${-20 + Math.random() * 30}%`, // Start from far left
-               animationDelay: `${i * 5 + Math.random() * 5}s`,
-               animationDuration: `${3 + Math.random()}s`
+               top: `${(i * 15) % 60}%`,
+               left: `${(i * 10) % 40}%`,
+               animationDelay: `${i * 7}s`,
+               animationDuration: '5s'
              }}
            >
-             {/* Glowing Head */}
              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-1 bg-white rounded-full blur-[0.5px] shadow-[0_0_15px_3px_rgba(99,102,241,0.6)]" />
            </div>
          ))}
       </div>
       
-      {/* Layer 7: Cosmic Formulas (Floating Wisdom) */}
+      {/* Layer 7: Cosmic Formulas */}
       {items.map((item, i) => (
         <div 
           key={item.id}
-          className="absolute font-mono text-indigo-300/15 whitespace-nowrap animate-float-gentle mix-blend-screen"
+          className="absolute font-mono text-indigo-300/15 whitespace-nowrap animate-float-gentle mix-blend-screen gpu-accelerated"
           style={{
             top: item.top,
             left: item.left,
@@ -133,11 +132,11 @@ const AnimatedBackground = () => {
         </div>
       ))}
 
-      {/* Layer 8: Final Vignette for Depth */}
+      {/* Layer 8: Final Vignette */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000_100%)] pointer-events-none" />
     </div>
   );
-};
+});
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewType>('daily');
@@ -186,93 +185,65 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('zenith_sessions', JSON.stringify(sessions));
+    const timeoutId = setTimeout(() => {
+        localStorage.setItem('zenith_sessions', JSON.stringify(sessions));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [sessions]);
 
   useEffect(() => {
-    localStorage.setItem('zenith_tests', JSON.stringify(tests));
+    const timeoutId = setTimeout(() => {
+        localStorage.setItem('zenith_tests', JSON.stringify(tests));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [tests]);
 
   useEffect(() => {
-    localStorage.setItem('zenith_targets', JSON.stringify(targets));
+    const timeoutId = setTimeout(() => {
+        localStorage.setItem('zenith_targets', JSON.stringify(targets));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [targets]);
 
   useEffect(() => {
-    localStorage.setItem('zenith_goals', JSON.stringify(goals));
+    const timeoutId = setTimeout(() => {
+        localStorage.setItem('zenith_goals', JSON.stringify(goals));
+    }, 500);
+    return () => clearTimeout(timeoutId);
   }, [goals]);
 
-  const handleSaveSession = (newSession: Omit<Session, 'id' | 'timestamp'>) => {
+  const handleSaveSession = useCallback((newSession: Omit<Session, 'id' | 'timestamp'>) => {
     const session: Session = { ...newSession, id: crypto.randomUUID(), timestamp: Date.now() };
     setSessions(prev => [session, ...prev]);
-  };
+  }, []);
 
-  const handleDeleteSession = (id: string) => {
+  const handleDeleteSession = useCallback((id: string) => {
     setSessions(prev => prev.filter(s => s.id !== id));
-  };
+  }, []);
 
-  const handleSaveTest = (newTest: Omit<TestResult, 'id' | 'timestamp'>) => {
+  const handleSaveTest = useCallback((newTest: Omit<TestResult, 'id' | 'timestamp'>) => {
     const test: TestResult = { ...newTest, id: crypto.randomUUID(), timestamp: Date.now() };
     setTests(prev => [test, ...prev]);
-  };
+  }, []);
 
-  const handleDeleteTest = (id: string) => {
+  const handleDeleteTest = useCallback((id: string) => {
     setTests(prev => prev.filter(t => t.id !== id));
-  };
+  }, []);
 
-  const handleSaveTarget = (target: Target) => {
+  const handleSaveTarget = useCallback((target: Target) => {
     setTargets(prev => [...prev, target]);
-  };
+  }, []);
 
-  const handleUpdateTarget = (id: string, completed: boolean) => {
+  const handleUpdateTarget = useCallback((id: string, completed: boolean) => {
     setTargets(prev => prev.map(t => t.id === id ? { ...t, completed } : t));
-  };
+  }, []);
 
-  const handleDeleteTarget = (id: string) => {
+  const handleDeleteTarget = useCallback((id: string) => {
     setTargets(prev => prev.filter(t => t.id !== id));
-  };
+  }, []);
 
   return (
     <div className="min-h-screen text-slate-100 font-sans pb-32 selection:bg-indigo-500/30 selection:text-white overflow-x-hidden relative">
-      <style>{`
-        @keyframes star-drift {
-          from { background-position: 0 0; }
-          to { background-position: 0 600px; }
-        }
-        @keyframes shooting-star {
-          0% { transform: translateX(0) translateY(0) rotate(10deg) scale(0.8); opacity: 0; }
-          10% { opacity: 1; }
-          80% { opacity: 1; }
-          100% { transform: translateX(150vw) translateY(26vw) rotate(10deg) scale(0.8); opacity: 0; } 
-        }
-        
-        @keyframes float-gentle { 
-          0% { transform: translate(0, 0) scale(1); opacity: 0.1; }
-          50% { transform: translate(20px, -20px) scale(1.05); opacity: 0.2; }
-          100% { transform: translate(0, 0) scale(1); opacity: 0.1; }
-        }
-        @keyframes nebula-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.2; }
-          50% { transform: scale(1.1); opacity: 0.35; }
-        }
-        @keyframes nebula-pulse-alt {
-          0%, 100% { transform: scale(1.1); opacity: 0.15; }
-          50% { transform: scale(1.1); opacity: 0.15; }
-        }
-        @keyframes fadeIn { 
-          from { opacity: 0; transform: translateY(20px) scale(0.98); } 
-          to { opacity: 1; transform: translateY(0) scale(1); } 
-        }
-        .animate-star-drift-slow { animation: star-drift 120s linear infinite; }
-        .animate-star-drift-medium { animation: star-drift 80s linear infinite; }
-        .animate-star-drift-fast { animation: star-drift 40s linear infinite; }
-        .animate-shooting-star { animation: shooting-star linear infinite; }
-        .animate-float-gentle { animation: float-gentle ease-in-out infinite; }
-        .animate-nebula-pulse { animation: nebula-pulse 12s ease-in-out infinite; }
-        .animate-nebula-pulse-alt { animation: nebula-pulse-alt 15s ease-in-out infinite; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
-
       <AnimatedBackground />
 
       <div className="max-w-4xl mx-auto p-3 md:p-8 min-h-screen flex flex-col relative z-10">

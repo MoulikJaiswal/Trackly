@@ -15,6 +15,8 @@
             background-color: #020617;
             margin: 0;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .font-mono {
             font-family: 'JetBrains+Mono', monospace;
@@ -22,13 +24,49 @@
         .font-display {
             font-family: 'Outfit', sans-serif;
         }
-        @keyframes orbit {
-            from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
-            to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+        
+        /* Optimized Animations using GPU layers */
+        @keyframes star-drift {
+            from { transform: translate3d(0, 0, 0); }
+            to { transform: translate3d(0, 600px, 0); }
         }
-        .animate-orbit {
-            animation: orbit 20s linear infinite;
+        
+        @keyframes shooting-star {
+            0% { transform: translateX(0) translateY(0) rotate(10deg) scale(0.8); opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateX(150vw) translateY(26vw) rotate(10deg) scale(0.8); opacity: 0; } 
         }
+        
+        @keyframes float-gentle { 
+            0% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; }
+            50% { transform: translate3d(20px, -20px, 0) scale(1.05); opacity: 0.2; }
+            100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.1; }
+        }
+        
+        @keyframes nebula-pulse {
+            0%, 100% { transform: scale3d(1, 1, 1); opacity: 0.2; }
+            50% { transform: scale3d(1.1, 1.1, 1); opacity: 0.35; }
+        }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translate3d(0, 20px, 0) scale(0.98); } 
+            to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); } 
+        }
+
+        .gpu-accelerated {
+            will-change: transform;
+            transform: translateZ(0);
+        }
+
+        .animate-star-drift-slow { animation: star-drift 120s linear infinite; }
+        .animate-star-drift-medium { animation: star-drift 80s linear infinite; }
+        .animate-star-drift-fast { animation: star-drift 40s linear infinite; }
+        .animate-shooting-star { animation: shooting-star linear infinite; }
+        .animate-float-gentle { animation: float-gentle ease-in-out infinite; }
+        .animate-nebula-pulse { animation: nebula-pulse 12s ease-in-out infinite; }
+        
+        /* Scrollbar Optimization */
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -42,6 +80,8 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.2);
         }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 <script type="importmap">
 {

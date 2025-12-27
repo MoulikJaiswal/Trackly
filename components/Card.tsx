@@ -8,7 +8,7 @@ interface CardProps {
   onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', delay = 0, onClick }) => (
+export const Card: React.FC<CardProps> = React.memo(({ children, className = '', delay = 0, onClick }) => (
   <div 
     onClick={onClick}
     className={`
@@ -18,23 +18,25 @@ export const Card: React.FC<CardProps> = ({ children, className = '', delay = 0,
       ${className}
     `}
     style={{ 
-      animation: `fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s backwards`
+      animation: `fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s backwards`,
+      willChange: 'transform, opacity' // Hint browser for optimization
     }}
   >
     {children}
   </div>
-);
+));
 
-export const FloatingCard: React.FC<CardProps> = ({ children, className = '', delay = 0 }) => (
+export const FloatingCard: React.FC<CardProps> = React.memo(({ children, className = '', delay = 0 }) => (
   <div 
     className={`
       backdrop-blur-2xl bg-slate-900/60 border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl animate-float
       ${className}
     `}
     style={{ 
-      animation: `float 6s ease-in-out infinite ${delay}s, fadeIn 1s ease-out ${delay}s backwards`
+      animation: `float 6s ease-in-out infinite ${delay}s, fadeIn 1s ease-out ${delay}s backwards`,
+      willChange: 'transform'
     }}
   >
     {children}
   </div>
-);
+));
