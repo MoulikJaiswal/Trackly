@@ -11,21 +11,35 @@ import {
   Zap,
   Atom,
   Calculator,
-  Brain
+  Brain,
+  Waves,
+  CheckCircle2,
+  ListTodo
 } from 'lucide-react';
 import { Card } from './Card';
 import { JEE_SYLLABUS } from '../constants';
+import { Target } from '../types';
 
-export const FocusTimer: React.FC = () => {
+interface FocusTimerProps {
+  targets?: Target[];
+}
+
+export const FocusTimer: React.FC<FocusTimerProps> = ({ targets = [] }) => {
   const [selectedSubject, setSelectedSubject] = useState<keyof typeof JEE_SYLLABUS>('Physics');
   const [focusDuration, setFocusDuration] = useState(60); 
   const [timeLeft, setTimeLeft] = useState(60 * 60);
   const [isActive, setIsActive] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(false); // Default to off for audio policy
+  const [selectedTask, setSelectedTask] = useState<string>('');
   
   const [todayStats, setTodayStats] = useState({ Physics: 0, Chemistry: 0, Maths: 0 });
   const timerRef = useRef<any>(null);
+  
+  // Audio Context Refs
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const brownNoiseNodeRef = useRef<ScriptProcessorNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -38,8 +52,58 @@ export const FocusTimer: React.FC = () => {
     localStorage.setItem(`zenith_stats_${today}`, JSON.stringify(todayStats));
   }, [todayStats]);
 
+  // Audio Engine: Brown Noise Generator (Scientific Focus Sound)
+  const toggleAudio = () => {
+    const shouldEnable = !soundEnabled;
+    setSoundEnabled(shouldEnable);
+
+    if (shouldEnable) {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      
+      const ctx = audioContextRef.current;
+      if (ctx?.state === 'suspended') ctx.resume();
+
+      const bufferSize = 4096;
+      const brownNoise = ctx!.createScriptProcessor(bufferSize, 1, 1);
+      
+      brownNoise.onaudioprocess = (e) => {
+        const output = e.outputBuffer.getChannelData(0);
+        let lastOut = 0;
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            output[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = output[i];
+            output[i] *= 3.5; // Gain compensation
+        }
+      };
+
+      const gainNode = ctx!.createGain();
+      gainNode.gain.value = 0.08; // Gentle volume
+      
+      brownNoise.connect(gainNode);
+      gainNode.connect(ctx!.destination);
+      
+      brownNoiseNodeRef.current = brownNoise;
+      gainNodeRef.current = gainNode;
+    } else {
+      // Cleanup
+      if (brownNoiseNodeRef.current) brownNoiseNodeRef.current.disconnect();
+      if (gainNodeRef.current) gainNodeRef.current.disconnect();
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // Cleanup on unmount
+      if (brownNoiseNodeRef.current) brownNoiseNodeRef.current.disconnect();
+      if (gainNodeRef.current) gainNodeRef.current.disconnect();
+      if (audioContextRef.current) audioContextRef.current.close();
+    };
+  }, []);
+
   const playBeep = () => {
-    if (!soundEnabled) return;
     try {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
       const osc = ctx.createOscillator();
@@ -69,17 +133,25 @@ export const FocusTimer: React.FC = () => {
       if (timerRef.current) clearInterval(timerRef.current);
       setIsActive(false);
       playBeep();
+      if (soundEnabled) toggleAudio(); // Turn off noise when done
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isActive, timeLeft, selectedSubject]);
 
-  const toggleTimer = () => setIsActive(!isActive);
+  const toggleTimer = () => {
+    const willBeActive = !isActive;
+    setIsActive(willBeActive);
+    
+    // Auto-enable audio on start if user prefers (optional UX, keeping manual for now)
+    // if (willBeActive && !soundEnabled) toggleAudio();
+  };
 
   const resetTimer = () => {
     setIsActive(false);
     setTimeLeft(focusDuration * 60);
+    if (soundEnabled) toggleAudio();
   };
 
   const formatTime = (seconds: number) => {
@@ -109,6 +181,8 @@ export const FocusTimer: React.FC = () => {
   ], []);
 
   const currentSubject = subjects.find(s => s.id === selectedSubject)!;
+  const activeTaskObj = targets.find(t => t.id === selectedTask);
+  const pendingTasks = targets.filter(t => !t.completed);
 
   // Circular Progress Metrics
   const radius = 88; 
@@ -162,7 +236,7 @@ export const FocusTimer: React.FC = () => {
         
         {/* Main Panel */}
         <div className={`transition-all duration-500 ${showSettings ? 'lg:col-span-7' : 'lg:col-span-8 lg:col-start-3'}`}>
-          <Card className="relative overflow-hidden p-8 md:p-12 flex flex-col items-center bg-[#0B1121] border-white/5 shadow-2xl min-h-[480px]">
+          <Card className="relative overflow-hidden p-8 md:p-12 flex flex-col items-center bg-[#0B1121] border-white/5 shadow-2xl min-h-[500px]">
             {/* Background Glow Pulse */}
             <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full mix-blend-screen filter blur-[100px] animate-pulse"
@@ -170,7 +244,7 @@ export const FocusTimer: React.FC = () => {
             </div>
 
             {/* Subject Selector (Segmented) */}
-            <div className="relative z-10 flex bg-white/5 p-1 rounded-2xl border border-white/5 mb-10 w-full max-w-sm">
+            <div className="relative z-10 flex bg-white/5 p-1 rounded-2xl border border-white/5 mb-6 w-full max-w-sm">
               {subjects.map(s => {
                 const isSelected = selectedSubject === s.id;
                 return (
@@ -191,6 +265,27 @@ export const FocusTimer: React.FC = () => {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Task Linking (New Feature) */}
+            <div className="relative z-20 w-full max-w-xs mb-8">
+               <div className={`relative flex items-center bg-[#050914] border rounded-xl px-3 py-2 transition-all ${activeTaskObj ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10'}`}>
+                  <ListTodo size={14} className={activeTaskObj ? 'text-emerald-400' : 'text-slate-500'} />
+                  <select 
+                    value={selectedTask}
+                    onChange={(e) => setSelectedTask(e.target.value)}
+                    disabled={isActive}
+                    className="w-full bg-transparent text-xs font-bold text-white outline-none ml-2 appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-slate-900 text-slate-400">Select Active Task (Optional)</option>
+                    {pendingTasks.map(t => (
+                      <option key={t.id} value={t.id} className="bg-slate-900 text-white truncate">
+                         {t.text.substring(0, 30)}{t.text.length > 30 ? '...' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  {activeTaskObj && <CheckCircle2 size={14} className="text-emerald-400 absolute right-3" />}
+               </div>
             </div>
 
             {/* Advanced Timer Ring */}
@@ -228,9 +323,13 @@ export const FocusTimer: React.FC = () => {
                   {formatTime(timeLeft)}
                 </div>
                 <div className="mt-3 flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/5">
-                   <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`} />
+                   {soundEnabled && <div className="flex gap-0.5 items-end h-3">
+                      <div className="w-0.5 bg-emerald-400 animate-[bounce_0.5s_infinite] h-1.5"></div>
+                      <div className="w-0.5 bg-emerald-400 animate-[bounce_0.7s_infinite] h-3"></div>
+                      <div className="w-0.5 bg-emerald-400 animate-[bounce_0.6s_infinite] h-2"></div>
+                   </div>}
                    <span className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
-                     {isActive ? 'Focus Mode' : 'Paused'}
+                     {soundEnabled ? 'Neural Audio' : isActive ? 'Focus Mode' : 'Paused'}
                    </span>
                 </div>
               </div>
@@ -239,10 +338,11 @@ export const FocusTimer: React.FC = () => {
             {/* Primary Controls */}
             <div className="relative z-10 flex items-center gap-8">
               <button 
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`p-4 rounded-full border transition-all active:scale-95 ${soundEnabled ? 'bg-white/5 border-white/10 text-slate-300 hover:text-white' : 'bg-transparent border-transparent text-slate-600 hover:bg-white/5'}`}
+                onClick={toggleAudio}
+                className={`p-4 rounded-full border transition-all active:scale-95 group relative ${soundEnabled ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-transparent border-transparent text-slate-600 hover:bg-white/5'}`}
               >
-                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+                {soundEnabled ? <Waves size={24} className="animate-pulse" /> : <Waves size={24} />}
+                <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[9px] font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity text-slate-500">Brown Noise</span>
               </button>
 
               <button 

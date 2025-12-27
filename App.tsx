@@ -310,7 +310,7 @@ const App: React.FC = () => {
             />
           )}
           {view === 'planner' && <Planner targets={targets} onAdd={handleSaveTarget} onToggle={handleUpdateTarget} onDelete={handleDeleteTarget} />}
-          {view === 'focus' && <FocusTimer />}
+          {view === 'focus' && <FocusTimer targets={targets} />}
           {view === 'tests' && <TestLog tests={tests} onSave={handleSaveTest} onDelete={handleDeleteTest} />}
           {view === 'analytics' && <Analytics sessions={sessions} tests={tests} />}
         </main>
