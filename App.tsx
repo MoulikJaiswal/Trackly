@@ -18,10 +18,10 @@ import { TestLog } from './components/TestLog';
 import { Analytics } from './components/Analytics';
 
 const TracklyLogo = React.memo(() => (
-  <div className="flex flex-col items-center gap-1 group">
+  <div className="flex items-center gap-3 select-none">
     {/* SVG Waveform Icon */}
-    <div className="relative w-10 h-6 md:w-12 md:h-8">
-      <svg viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_0_10px_rgba(249,115,22,0.4)]">
+    <div className="relative w-8 h-5">
+      <svg viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_0_8px_rgba(249,115,22,0.4)]">
         <defs>
           <linearGradient id="logo-gradient" x1="0" y1="0" x2="48" y2="0" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#fb923c" /> {/* orange-400 */}
@@ -32,15 +32,14 @@ const TracklyLogo = React.memo(() => (
         <path 
           d="M2 18 C 6 18, 8 10, 12 14 C 15 17, 17 6, 20 2 C 23 -2, 26 18, 28 22 C 30 26, 32 10, 36 12 C 40 14, 42 18, 46 18" 
           stroke="url(#logo-gradient)" 
-          strokeWidth="3.5" 
+          strokeWidth="4" 
           strokeLinecap="round" 
           strokeLinejoin="round"
-          className="group-hover:animate-pulse"
         />
       </svg>
     </div>
     {/* Text */}
-    <span className="text-2xl md:text-3xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-white tracking-tight drop-shadow-sm">
+    <span className="text-xl font-display font-extrabold text-white tracking-tight">
       Trackly
     </span>
   </div>
@@ -248,53 +247,50 @@ const App: React.FC = () => {
     <div className="min-h-screen text-slate-100 font-sans pb-32 selection:bg-indigo-500/30 selection:text-white overflow-x-hidden relative">
       <AnimatedBackground />
 
-      <div className="max-w-4xl mx-auto p-4 md:p-8 min-h-screen flex flex-col relative z-10">
-        {/* Changed flex-row breakpoint to lg to handle tablets better, added shrink-0 to nav */}
-        <header className="flex flex-col lg:flex-row justify-between items-center mb-6 md:mb-10 pb-6 gap-6 pt-4">
-          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full lg:w-auto group cursor-default">
-            
-            <TracklyLogo />
-
-            <div className="flex items-center gap-3 mt-2 md:mt-0">
-              <div className="hidden md:block h-8 w-[1px] bg-white/10 mx-2"></div>
-              
-              {/* Status Indicator */}
-              <div className="flex flex-col md:flex-row gap-3 md:gap-6 text-center md:text-left">
-                <div className="flex items-center gap-2 justify-center md:justify-start">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
-                  <p className="text-[10px] text-indigo-400/80 font-bold uppercase tracking-[0.2em]">Active</p>
-                </div>
-                
-                {/* Streak Badge */}
-                <div className="flex items-center gap-1.5 justify-center md:justify-start">
-                    <Flame size={12} className="text-orange-500 fill-orange-500/50" />
-                    <span className="text-[10px] font-bold text-orange-200 uppercase tracking-widest">{streak} Day Streak</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-8 min-h-screen flex flex-col relative z-10">
+        
+        {/* Revamped Header */}
+        <header className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-10 pt-4 relative z-20">
           
-          <nav className="flex gap-1 bg-slate-950/20 backdrop-blur-md md:backdrop-blur-2xl p-1 rounded-2xl w-full lg:w-auto max-w-full overflow-x-auto no-scrollbar border border-white/5 shadow-2xl touch-pan-x shrink-0">
-            {[
-              { id: 'daily', label: 'Home', icon: LayoutDashboard },
-              { id: 'planner', label: 'Planner', icon: CalendarIcon },
-              { id: 'focus', label: 'Timer', icon: Timer },
-              { id: 'tests', label: 'Tests', icon: PenTool },
-              { id: 'analytics', label: 'Stats', icon: BarChart3 },
-            ].map(tab => (
-              <button 
-                key={tab.id}
-                onClick={() => setView(tab.id as ViewType)} 
-                className={`flex-1 px-3 py-2.5 md:py-2 rounded-xl text-[9px] md:text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 whitespace-nowrap relative overflow-hidden tracking-widest shrink-0 ${view === tab.id ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                {view === tab.id && (
-                  <div className="absolute inset-0 bg-indigo-600/80 rounded-xl -z-10 animate-in fade-in zoom-in-95 duration-200 shadow-lg shadow-indigo-600/20"></div>
-                )}
-                <tab.icon size={14} className="relative z-10" /> 
-                <span className="relative z-10">{tab.label}</span>
-              </button>
-            ))}
-          </nav>
+          {/* Left Group: Logo */}
+          <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-xl p-2 rounded-full border border-white/5 shadow-2xl">
+              <div className="bg-white/5 rounded-full px-6 py-2">
+                 <TracklyLogo />
+              </div>
+          </div>
+
+          {/* Right Group: Nav + Streak */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+             
+             {/* Navigation */}
+             <nav className="flex gap-1 bg-slate-950/40 backdrop-blur-xl p-1.5 rounded-full w-full sm:w-auto overflow-x-auto no-scrollbar border border-white/10 shadow-xl">
+              {[
+                { id: 'daily', label: 'Home', icon: LayoutDashboard },
+                { id: 'planner', label: 'Planner', icon: CalendarIcon },
+                { id: 'focus', label: 'Timer', icon: Timer },
+                { id: 'tests', label: 'Tests', icon: PenTool },
+                { id: 'analytics', label: 'Stats', icon: BarChart3 },
+              ].map(tab => (
+                <button 
+                  key={tab.id}
+                  onClick={() => setView(tab.id as ViewType)} 
+                  className={`px-5 py-2.5 rounded-full text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap relative overflow-hidden tracking-widest shrink-0 ${view === tab.id ? 'text-white shadow-lg bg-indigo-600' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}`}
+                >
+                  <tab.icon size={14} className="relative z-10" /> 
+                  <span className="relative z-10 hidden md:inline">{tab.label}</span>
+                  <span className="relative z-10 md:hidden">{view === tab.id ? tab.label : ''}</span>
+                </button>
+              ))}
+            </nav>
+
+             {/* Streak Pill */}
+             <div className="flex items-center gap-2 px-4 py-2.5 bg-orange-500/10 border border-orange-500/20 rounded-full shrink-0">
+                <Flame size={14} className="text-orange-500 fill-orange-500 animate-pulse" />
+                <span className="text-[10px] font-bold text-orange-200 uppercase tracking-wider">{streak} Day Streak</span>
+             </div>
+
+          </div>
+
         </header>
 
         <main className="flex-grow space-y-8 md:space-y-12">

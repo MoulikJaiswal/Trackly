@@ -347,7 +347,8 @@ const SubjectDetailModal = memo(({
                    MISTAKE_TYPES.map(type => {
                      const count = mistakesSummary[type.id] || 0;
                      if(count === 0) return null;
-                     const max = Math.max(...Object.values(mistakesSummary));
+                     // Add explicit cast to number[] for Object.values and a fallback to 1 to satisfy TS and avoid division by zero.
+                     const max = Math.max(...(Object.values(mistakesSummary) as number[]), 1);
                      return (
                        <div key={type.id} className="flex items-center gap-3">
                          <div className={`w-2 h-2 rounded-full shrink-0 ${type.color.replace('text', 'bg')}`} />
@@ -570,7 +571,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           sessions={sessions.filter(s => s.subject === selectedSubject)}
           onClose={() => setSelectedSubject(null)}
           onSaveSession={onSaveSession}
-          onDeleteSession={onDelete}
+          onDeleteSession={(id) => onDelete(id)}
         />
       )}
     </>
