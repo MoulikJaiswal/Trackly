@@ -20,7 +20,7 @@ import { Analytics } from './components/Analytics';
 const TracklyLogo = React.memo(() => (
   <div className="flex flex-col items-center gap-1 group">
     {/* SVG Waveform Icon */}
-    <div className="relative w-12 h-8">
+    <div className="relative w-10 h-6 md:w-12 md:h-8">
       <svg viewBox="0 0 48 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-[0_0_10px_rgba(249,115,22,0.4)]">
         <defs>
           <linearGradient id="logo-gradient" x1="0" y1="0" x2="48" y2="0" gradientUnits="userSpaceOnUse">
@@ -40,7 +40,7 @@ const TracklyLogo = React.memo(() => (
       </svg>
     </div>
     {/* Text */}
-    <span className="text-3xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-white tracking-tight drop-shadow-sm">
+    <span className="text-2xl md:text-3xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-100 to-white tracking-tight drop-shadow-sm">
       Trackly
     </span>
   </div>
@@ -62,7 +62,9 @@ const AnimatedBackground = React.memo(() => {
     left: `${(i * 23) % 95}%`,
     duration: 40 + (i % 20),
     delay: -(i * 7),
-    size: 0.7 + (i % 4) * 0.25
+    size: 0.7 + (i % 4) * 0.25,
+    // Hide half the items on mobile for performance
+    hiddenOnMobile: i % 2 === 0
   })), []);
 
   return (
@@ -79,7 +81,7 @@ const AnimatedBackground = React.memo(() => {
            }} />
 
       {/* Layer 3: Medium Star Field (Medium Parallax) */}
-      <div className="absolute inset-0 opacity-40 animate-star-drift-medium gpu-accelerated" 
+      <div className="absolute inset-0 opacity-40 animate-star-drift-medium gpu-accelerated hidden md:block" 
            style={{ 
              backgroundImage: `radial-gradient(1.5px 1.5px at 15px 15px, white, transparent), radial-gradient(1.5px 1.5px at 100px 50px, white, transparent)`, 
              backgroundSize: '200px 200px' 
@@ -93,20 +95,20 @@ const AnimatedBackground = React.memo(() => {
            }} />
       
       {/* Layer 5: Galactic Nebulae (Dynamic Glows) */}
-      <div className="absolute top-[-20%] right-[-10%] w-[100%] h-[100%] opacity-25 blur-[120px] animate-nebula-pulse bg-indigo-600/20 rounded-full mix-blend-screen gpu-accelerated" />
+      <div className="absolute top-[-20%] right-[-10%] w-[100%] h-[100%] opacity-20 md:opacity-25 blur-[120px] animate-nebula-pulse bg-indigo-600/20 rounded-full mix-blend-screen gpu-accelerated" />
       <div className="absolute bottom-[-15%] left-[-20%] w-[100%] h-[100%] opacity-15 blur-[150px] animate-nebula-pulse-alt bg-purple-600/20 rounded-full mix-blend-screen gpu-accelerated" />
       
-      {/* Layer 6: Shooting Stars */}
+      {/* Layer 6: Shooting Stars - Reduced count */}
       <div className="absolute inset-0">
-         {[...Array(6)].map((_, i) => (
+         {[...Array(4)].map((_, i) => (
            <div 
              key={`shooting-star-${i}`}
              className="absolute h-[1px] w-[180px] bg-gradient-to-r from-transparent to-white opacity-0 animate-shooting-star"
              style={{
                top: `${(i * 15) % 60}%`,
                left: `${(i * 10) % 40}%`,
-               animationDelay: `${i * 7}s`,
-               animationDuration: '5s'
+               animationDelay: `${i * 10}s`,
+               animationDuration: '6s'
              }}
            >
              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-1 bg-white rounded-full blur-[0.5px] shadow-[0_0_15px_3px_rgba(99,102,241,0.6)]" />
@@ -118,7 +120,7 @@ const AnimatedBackground = React.memo(() => {
       {items.map((item, i) => (
         <div 
           key={item.id}
-          className="absolute font-mono text-indigo-300/15 whitespace-nowrap animate-float-gentle mix-blend-screen gpu-accelerated"
+          className={`absolute font-mono text-indigo-300/15 whitespace-nowrap animate-float-gentle mix-blend-screen gpu-accelerated ${item.hiddenOnMobile ? 'hidden md:block' : ''}`}
           style={{
             top: item.top,
             left: item.left,
@@ -246,25 +248,25 @@ const App: React.FC = () => {
     <div className="min-h-screen text-slate-100 font-sans pb-32 selection:bg-indigo-500/30 selection:text-white overflow-x-hidden relative">
       <AnimatedBackground />
 
-      <div className="max-w-4xl mx-auto p-3 md:p-8 min-h-screen flex flex-col relative z-10">
+      <div className="max-w-4xl mx-auto p-4 md:p-8 min-h-screen flex flex-col relative z-10">
         {/* Changed flex-row breakpoint to lg to handle tablets better, added shrink-0 to nav */}
         <header className="flex flex-col lg:flex-row justify-between items-center mb-6 md:mb-10 pb-6 gap-6 pt-4">
-          <div className="flex items-center gap-6 w-full lg:w-auto group cursor-default">
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full lg:w-auto group cursor-default">
             
             <TracklyLogo />
 
-            <div className="hidden md:flex items-center gap-3">
-              <div className="h-8 w-[1px] bg-white/10 mx-2"></div>
+            <div className="flex items-center gap-3 mt-2 md:mt-0">
+              <div className="hidden md:block h-8 w-[1px] bg-white/10 mx-2"></div>
               
               {/* Status Indicator */}
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col md:flex-row gap-3 md:gap-6 text-center md:text-left">
+                <div className="flex items-center gap-2 justify-center md:justify-start">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
                   <p className="text-[10px] text-indigo-400/80 font-bold uppercase tracking-[0.2em]">Active</p>
                 </div>
                 
                 {/* Streak Badge */}
-                <div className="flex items-center gap-1.5 mt-1">
+                <div className="flex items-center gap-1.5 justify-center md:justify-start">
                     <Flame size={12} className="text-orange-500 fill-orange-500/50" />
                     <span className="text-[10px] font-bold text-orange-200 uppercase tracking-widest">{streak} Day Streak</span>
                 </div>
@@ -272,18 +274,18 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <nav className="flex gap-1 bg-slate-950/20 backdrop-blur-2xl p-1 rounded-2xl w-full lg:w-auto max-w-full overflow-x-auto no-scrollbar border border-white/5 shadow-2xl touch-pan-x shrink-0">
+          <nav className="flex gap-1 bg-slate-950/20 backdrop-blur-md md:backdrop-blur-2xl p-1 rounded-2xl w-full lg:w-auto max-w-full overflow-x-auto no-scrollbar border border-white/5 shadow-2xl touch-pan-x shrink-0">
             {[
-              { id: 'daily', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'daily', label: 'Home', icon: LayoutDashboard },
               { id: 'planner', label: 'Planner', icon: CalendarIcon },
               { id: 'focus', label: 'Timer', icon: Timer },
               { id: 'tests', label: 'Tests', icon: PenTool },
-              { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+              { id: 'analytics', label: 'Stats', icon: BarChart3 },
             ].map(tab => (
               <button 
                 key={tab.id}
                 onClick={() => setView(tab.id as ViewType)} 
-                className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-center gap-2 whitespace-nowrap relative overflow-hidden tracking-widest shrink-0 ${view === tab.id ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 px-3 py-2.5 md:py-2 rounded-xl text-[9px] md:text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-center gap-1.5 md:gap-2 whitespace-nowrap relative overflow-hidden tracking-widest shrink-0 ${view === tab.id ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
               >
                 {view === tab.id && (
                   <div className="absolute inset-0 bg-indigo-600/80 rounded-xl -z-10 animate-in fade-in zoom-in-95 duration-200 shadow-lg shadow-indigo-600/20"></div>
@@ -301,7 +303,7 @@ const App: React.FC = () => {
               sessions={sessions} 
               quote={QUOTES[quoteIdx]} 
               onDelete={handleDeleteSession} 
-              targets={targets}
+              targets={targets} 
               goals={goals}
               setGoals={setGoals}
               onSaveSession={handleSaveSession}

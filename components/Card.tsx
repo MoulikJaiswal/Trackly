@@ -12,7 +12,7 @@ export const Card: React.FC<CardProps> = React.memo(({ children, className = '',
   <div 
     onClick={onClick}
     className={`
-      backdrop-blur-xl bg-slate-900/40 border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl 
+      backdrop-blur-lg md:backdrop-blur-xl bg-slate-900/40 border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl 
       transition-all duration-500 hover:bg-slate-900/50 hover:border-white/20
       ${onClick ? 'cursor-pointer active:scale-95' : ''}
       ${className}
@@ -29,7 +29,7 @@ export const Card: React.FC<CardProps> = React.memo(({ children, className = '',
 export const FloatingCard: React.FC<CardProps> = React.memo(({ children, className = '', delay = 0 }) => (
   <div 
     className={`
-      backdrop-blur-2xl bg-slate-900/60 border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl animate-float
+      backdrop-blur-lg md:backdrop-blur-2xl bg-slate-900/60 border border-white/10 rounded-3xl p-5 md:p-6 shadow-2xl animate-float
       ${className}
     `}
     style={{ 

@@ -29,17 +29,17 @@ const ActivityHeatmap = memo(({ sessions }: { sessions: Session[] }) => {
   }, [sessions]);
 
   return (
-    <div className="flex gap-2 items-end">
+    <div className="flex gap-1.5 md:gap-2 items-end">
       {days.map((day, i) => (
         <div key={day.date} className="flex flex-col items-center gap-1">
           <div 
-            className={`w-3 md:w-4 rounded-sm transition-all duration-500 ${
+            className={`w-2.5 md:w-4 rounded-sm transition-all duration-500 ${
               day.count === 0 ? 'h-3 md:h-4 bg-white/5' : 
               day.count < 3 ? 'h-6 md:h-8 bg-indigo-500/40' : 
               'h-10 md:h-12 bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]'
             }`} 
           />
-          <span className="text-[8px] font-bold text-slate-600 uppercase">{day.dayName}</span>
+          <span className="text-[7px] md:text-[8px] font-bold text-slate-600 uppercase">{day.dayName}</span>
         </div>
       ))}
     </div>
@@ -77,13 +77,13 @@ const SubjectPod = memo(({
         if ((e.target as HTMLElement).closest('.goal-input')) return;
         onClick();
       }}
-      className={`relative overflow-hidden rounded-2xl border border-white/5 p-5 flex flex-col justify-between h-36 md:h-40 group cursor-pointer hover:border-white/20 transition-all duration-300 ${bgClass}`}
+      className={`relative overflow-hidden rounded-2xl border border-white/5 p-5 flex flex-col justify-between min-h-[160px] md:min-h-[180px] group cursor-pointer hover:border-white/20 transition-all duration-300 ${bgClass}`}
     >
-      <div className="flex justify-between items-start z-10">
-        <div className={`p-2.5 rounded-xl bg-white/10 text-white shadow-lg`}>
+      <div className="flex justify-between items-start z-10 w-full">
+        <div className={`p-2.5 rounded-xl bg-white/10 text-white shadow-lg shrink-0`}>
           <Icon size={20} />
         </div>
-        <div className="text-right goal-input z-20">
+        <div className="text-right goal-input z-20 flex-grow flex justify-end">
           {isEditing ? (
             <input 
               type="number" 
@@ -124,7 +124,7 @@ const SubjectPod = memo(({
         </div>
       </div>
       
-      <div className="z-10">
+      <div className="z-10 mt-4">
         <h4 className={`text-sm font-bold uppercase tracking-wider mb-1.5 ${colorClass}`}>{subject}</h4>
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-mono font-bold text-white tracking-tight">{count}</span>
@@ -196,22 +196,22 @@ const SubjectDetailModal = memo(({
   }, [sessions]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200">
       <div className="bg-[#0f172a] border border-white/10 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-indigo-500/10 to-transparent rounded-t-3xl shrink-0">
-          <div className="flex items-center gap-4">
-             {subject === 'Physics' && <Atom className="text-blue-400" size={28} />}
-             {subject === 'Chemistry' && <Zap className="text-orange-400" size={28} />}
-             {subject === 'Maths' && <Calculator className="text-rose-400" size={28} />}
+        <div className="p-5 md:p-6 border-b border-white/5 flex justify-between items-center bg-gradient-to-r from-indigo-500/10 to-transparent rounded-t-3xl shrink-0">
+          <div className="flex items-center gap-3 md:gap-4">
+             {subject === 'Physics' && <Atom className="text-blue-400" size={24} />}
+             {subject === 'Chemistry' && <Zap className="text-orange-400" size={24} />}
+             {subject === 'Maths' && <Calculator className="text-rose-400" size={24} />}
              <div>
-               <h2 className="text-2xl font-bold text-white uppercase tracking-wider">{subject} Hub</h2>
-               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Chapter Progress</p>
+               <h2 className="text-xl md:text-2xl font-bold text-white uppercase tracking-wider">{subject} Hub</h2>
+               <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">Chapter Progress</p>
              </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white">
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
@@ -219,20 +219,20 @@ const SubjectDetailModal = memo(({
         <div className="flex p-2 gap-2 border-b border-white/5 bg-black/20 shrink-0">
           <button 
             onClick={() => setActiveTab('log')}
-            className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'log' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
+            className={`flex-1 py-3 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'log' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
           >
             Add Session
           </button>
           <button 
              onClick={() => setActiveTab('history')}
-             className={`flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
+             className={`flex-1 py-3 rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-white/5'}`}
           >
             Past Sessions
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto flex-grow">
+        <div className="p-5 md:p-6 overflow-y-auto flex-grow">
           {activeTab === 'log' ? (
             <div className="space-y-6">
               {step === 1 ? (
@@ -241,7 +241,7 @@ const SubjectDetailModal = memo(({
                      <div className="space-y-2">
                         <label className="text-[10px] uppercase font-bold text-indigo-400 ml-1 tracking-widest">Topic / Chapter</label>
                         <select 
-                          className="w-full bg-black/30 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-indigo-500 transition-all text-sm"
+                          className="w-full bg-black/30 border border-white/10 p-4 rounded-2xl text-white outline-none focus:border-indigo-500 transition-all text-sm appearance-none"
                           value={logData.topic}
                           onChange={e => setLogData({...logData, topic: e.target.value})}
                         >
@@ -421,7 +421,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <>
-      <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="space-y-6 md:space-y-8 animate-in fade-in duration-500">
         
         {/* Top Section */}
         <div className="flex flex-col md:flex-row justify-between items-center md:items-end gap-6">
@@ -440,12 +440,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
 
         {/* Quote Section */}
-        <Card className="bg-indigo-600/5 border-indigo-500/10 p-6 flex flex-col justify-center items-center text-center relative overflow-hidden">
+        <Card className="bg-indigo-600/5 border-indigo-500/10 p-5 md:p-6 flex flex-col justify-center items-center text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent opacity-50"></div>
-            <p className="text-lg md:text-xl font-serif italic text-indigo-100 leading-relaxed max-w-2xl mx-auto relative z-10 drop-shadow-lg">"{quote.text}"</p>
+            <p className="text-base md:text-xl font-serif italic text-indigo-100 leading-relaxed max-w-2xl mx-auto relative z-10 drop-shadow-lg">"{quote.text}"</p>
             <div className="mt-4 flex items-center justify-center gap-3 opacity-60">
                 <div className="h-[1px] w-8 bg-indigo-400"></div>
-                <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-indigo-300">{quote.author}</span>
+                <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-indigo-300">{quote.author}</span>
                 <div className="h-[1px] w-8 bg-indigo-400"></div>
             </div>
         </Card>
@@ -487,9 +487,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Left Column: Next Objectives */}
           <div className="lg:col-span-2 space-y-6">
-             <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+             <div className="bg-slate-900/40 border border-white/5 rounded-3xl p-5 md:p-6 relative overflow-hidden">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs md:text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                     <CalendarClock size={16} className="text-indigo-400" /> Up Next
                   </h3>
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
