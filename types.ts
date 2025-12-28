@@ -35,6 +35,9 @@ export interface Target {
   text: string;
   completed: boolean;
   timestamp: number;
+  type?: 'task' | 'test';
 }
 
 export type ViewType = 'daily' | 'planner' | 'focus' | 'tests' | 'analytics' | 'log';
+
+export type ThemeId = 'midnight' | 'obsidian' | 'void' | 'forest' | 'morning' | 'earth' | 'default-dark' | 'default-light';
